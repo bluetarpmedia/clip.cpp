@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.12)
 project("CLIP.cpp" C CXX)
 
+set(CMAKE_CXX_STANDARD 20)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if (NOT XCODE AND NOT MSVC AND NOT CMAKE_BUILD_TYPE)
@@ -62,8 +64,6 @@ option(CLIP_OPENBLAS               "CLIP: use OpenBLAS"                         
 
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 set(CMAKE_C_STANDARD_REQUIRED true)
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
 
 if (NOT MSVC)
     if (CLIP_SANITIZE_THREAD)
