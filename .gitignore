@@ -8,3 +8,4 @@ models/*.bin
 __pycache__
 dist
 *.gguf
+CMakeSettings.json
