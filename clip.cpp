@@ -5,7 +5,6 @@
 #include <fstream>
 #include <iostream>
 #include <map>
-#include <pthread.h>
 #include <regex>
 #include <stdexcept>
 #include <thread>
@@ -652,8 +651,8 @@ bool clip_tokenize(const clip_ctx * ctx, const char * text, struct clip_tokens *
             continue;
         }
 
-        for (int i = 0; i < word.size();) {
-            for (int j = word.size() - 1; j >= i; j--) {
+        for (size_t i = 0; i < word.size();) {
+            for (size_t j = word.size() - 1; j >= i; j--) {
                 auto cand = word.substr(i, j - i + 1);
                 auto it = ctx->vocab.token_to_id.find(cand);
                 if (it != ctx->vocab.token_to_id.end()) { // word.substr(i, j-i+1) in vocab
@@ -825,7 +824,7 @@ void * preprocess_image(void * arg) {
         clip_image_preprocess(ctx, input, resized); 
     }
     
-    pthread_exit(NULL);
+    return nullptr;
 }
 
 // Function to batch-preprocess multiple images i
@@ -847,7 +846,8 @@ void clip_image_batch_preprocess(const clip_ctx * ctx, const int n_threads, cons
     } else {
         // Multi-threaded case
 
-        std::vector<pthread_t> threads(num_threads);
+        std::vector<std::thread> threads;
+        threads.reserve(num_threads);
         std::vector<ImageData> imageData(img_inputs->size);
         ImageDataRange* imageDataRange = new ImageDataRange[num_threads]();
         
@@ -864,12 +864,15 @@ void clip_image_batch_preprocess(const clip_ctx * ctx, const int n_threads, cons
 
             // Create a thread for each batch of images
             imageDataRange[t] = {&imageData[start_index], &imageData[end_index - 1]};
-            pthread_create(&threads[t], NULL, preprocess_image, static_cast<void *>(&imageDataRange[t]));
+
+            threads.emplace_back(preprocess_image, static_cast<void *>(&imageDataRange[t]));
         }
 
         // Wait for all threads to finish
-        for (t = 0; t < num_threads; t++) {
-            pthread_join(threads[t], NULL);
+        for (auto & t : threads) {
+            if (t.joinable()) {
+                t.join();
+            }
         }
     }
 }
@@ -1407,8 +1410,8 @@ bool clip_compare_text_and_image(const clip_ctx * ctx, const int n_threads, cons
 
     // prepare image and text vectors
     const int projection_dim = ctx->vision_model.hparams.projection_dim;
-    float img_vec[projection_dim];
-    float txt_vec[projection_dim];
+    std::vector<float> img_vec(projection_dim);
+    std::vector<float> txt_vec(projection_dim);
 
     // tokenize and encode text
     clip_tokens tokens;
@@ -1416,7 +1419,7 @@ bool clip_compare_text_and_image(const clip_ctx * ctx, const int n_threads, cons
         return false;
     }
 
-    if (!clip_text_encode(ctx, n_threads, &tokens, txt_vec, true)) {
+    if (!clip_text_encode(ctx, n_threads, &tokens, txt_vec.data(), true)) {
         return false;
     }
 
@@ -1427,12 +1430,12 @@ bool clip_compare_text_and_image(const clip_ctx * ctx, const int n_threads, cons
         return false;
     }
 
-    if (!clip_image_encode(ctx, n_threads, &img_res, img_vec, true)) {
+    if (!clip_image_encode(ctx, n_threads, &img_res, img_vec.data(), true)) {
         return false;
     }
 
     // compute similarity
-    *score = clip_similarity_score(img_vec, txt_vec, projection_dim);
+    *score = clip_similarity_score(img_vec.data(), txt_vec.data(), projection_dim);
 
     return true;
 }
@@ -1465,7 +1468,7 @@ bool softmax_with_sorting(float * arr, const int length, float * sorted_scores, 
 
     double sum = 0.0;
     for (int i = 0; i < length; i++) {
-        arr[i] = exp(arr[i]) + 1e-9;
+        arr[i] = exp(arr[i]) + 1e-9f;
         sum += arr[i];
     }
 
@@ -1502,25 +1505,25 @@ bool clip_zero_shot_label_image(struct clip_ctx * ctx, const int n_threads, cons
 
     clip_image_preprocess(ctx, input_img, &img_res);
 
-    float img_vec[vec_dim];
-    if (!clip_image_encode(ctx, n_threads, &img_res, img_vec, false)) {
+    std::vector<float> img_vec(vec_dim);
+    if (!clip_image_encode(ctx, n_threads, &img_res, img_vec.data(), false)) {
         return false;
     }
 
     // encode texts and compute similarities
-    float txt_vec[vec_dim];
-    float similarities[n_labels];
+    std::vector<float> txt_vec(vec_dim);
+    std::vector<float> similarities(n_labels);
 
     for (int i = 0; i < n_labels; i++) {
         const auto & text = labels[i];
         clip_tokens tokens;
         clip_tokenize(ctx, text, &tokens);
-        clip_text_encode(ctx, n_threads, &tokens, txt_vec, false);
-        similarities[i] = clip_similarity_score(img_vec, txt_vec, vec_dim);
+        clip_text_encode(ctx, n_threads, &tokens, txt_vec.data(), false);
+        similarities[i] = clip_similarity_score(img_vec.data(), txt_vec.data(), vec_dim);
     }
 
     // apply softmax and sort scores
-    softmax_with_sorting(similarities, n_labels, scores, indices);
+    softmax_with_sorting(similarities.data(), n_labels, scores, indices);
 
     return true;
 }
