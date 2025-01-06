@@ -67,17 +67,9 @@ def download_dataset(path: Path, verbose: bool = False):
         if verbose:
             print("\tFound image validation file, skipping download..")
 
-    if not template_path.exists():
+    if template_path.exists():
         if verbose:
             print("\tDidnt find class templates file, downloading..")
-        call(
-            (
-                "wget "
-                + "https://raw.githubusercontent.com/LAION-AI/CLIP_benchmark/main/clip_benchmark/datasets/en_zeroshot_classification_templates.json "
-                + f"--output-document={template_path}"
-            ),
-            shell=True,
-        )
 
         class_templates = json.load(template_path.open("r"))
         class_templates = class_templates["imagenet1k"]
@@ -86,17 +78,10 @@ def download_dataset(path: Path, verbose: bool = False):
         if verbose:
             print("\tFound class templates file, skipping download..")
 
-    if not classnames_path.exists():
+    if classnames_path.exists():
         if verbose:
             print("\tDidnt find class names file, downloading..")
-        call(
-            (
-                "wget "
-                + "https://raw.githubusercontent.com/LAION-AI/CLIP_benchmark/main/clip_benchmark/datasets/en_classnames.json "
-                + f"--output-document={classnames_path}"
-            ),
-            shell=True,
-        )
+
         classnames = json.load(classnames_path.open("r"))
         classnames = classnames["imagenet1k"]
 

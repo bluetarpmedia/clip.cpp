@@ -3,6 +3,8 @@
 #include "clip.h"
 #include "common-clip.h"
 
+using namespace clippp;
+
 int main(int argc, char ** argv) {
     app_params params;
     if (!app_params_parse(argc, argv, params, 2, 1)) {

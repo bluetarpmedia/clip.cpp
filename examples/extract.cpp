@@ -5,6 +5,8 @@
 #include "clip.h"
 #include "common-clip.h"
 
+using namespace clippp;
+
 int main(int argc, char ** argv) {
     app_params params;
     if (!app_params_parse(argc, argv, params, 0, 0)) {
@@ -25,7 +27,7 @@ int main(int argc, char ** argv) {
         return 1;
     }
 
-    int totalInputs = params.image_paths.size() + params.texts.size();
+    const size_t totalInputs = params.image_paths.size() + params.texts.size();
     int processedInputs = 0;
     int textCounter = 0; // Counter for generating unique filenames for text vectors
     for (const std::string & img_path : params.image_paths) {

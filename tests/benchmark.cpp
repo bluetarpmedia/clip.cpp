@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+using namespace clippp;
+
 int main(int argc, char ** argv) {
     if (argc != 4 && argc != 5) {
         printf("usage: %s <model_path> <images_dir> <num_images_per_dir> [output_file]\n\n", argv[0]);

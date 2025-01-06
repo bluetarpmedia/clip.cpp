@@ -242,7 +242,7 @@ int writeNpyFile(const char * filename, const float * data, const int * shape, i
     fwrite(&header.minor_version, 1, 1, file);
     fwrite(&header.header_len, 2, 1, file);
     fwrite((char *)header.header, 1, strlen((char *)header.header), file);
-    const int padding_len = 128 - (10 + strlen((char *)header.header) + 1);
+    const int padding_len = 128 - (10 + (int)strlen((char *)header.header) + 1);
     for (int i = 0; i < padding_len; ++i) {
         fputc(0x20, file);
     }
@@ -262,17 +262,15 @@ int writeNpyFile(const char * filename, const float * data, const int * shape, i
 }
 
 // Constructor-like function
-struct clip_image_u8_batch clip_image_u8_batch_make(std::vector<clip_image_u8> & images) {
-    struct clip_image_u8_batch batch;
-    batch.data = images.data();
-    batch.size = images.size();
-    return batch;
+clippp::clip_image_u8_batch clip_image_u8_batch_make(std::vector<clippp::clip_image_u8> & images) {
+    return clippp::clip_image_u8_batch {
+        .data = images.data(),
+        .size = images.size() };
 }
 
 // Constructor-like function
-struct clip_image_f32_batch clip_image_f32_batch_make(std::vector<clip_image_f32> & images) {
-    struct clip_image_f32_batch batch;
-    batch.data = images.data();
-    batch.size = images.size();
-    return batch;
+clippp::clip_image_f32_batch clip_image_f32_batch_make(std::vector<clippp::clip_image_f32> & images) {
+    return clippp::clip_image_f32_batch {
+        .data = images.data(),
+        .size = images.size() };
 }

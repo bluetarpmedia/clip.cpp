@@ -9,10 +9,6 @@
 #include <algorithm>
 #include <string>
 
-// #ifdef __cplusplus
-// extern "C" {
-// #endif
-
 std::map<std::string, std::vector<std::string>> get_dir_keyed_files(const std::string & path, uint32_t max_files_per_dir);
 
 bool is_image_file_extension(const std::string & path);
@@ -40,11 +36,7 @@ int writeNpyFile(const char * filename, const float * data, const int * shape, i
 void write_floats_to_file(float * array, int size, char * filename);
 
 // constructor-like functions
-struct clip_image_u8_batch clip_image_u8_batch_make(std::vector<clip_image_u8> & images);
-struct clip_image_f32_batch clip_image_f32_batch_make(std::vector<clip_image_f32> & images);
-
-// #ifdef __cplusplus
-// }
-// #endif
+clippp::clip_image_u8_batch clip_image_u8_batch_make(std::vector<clippp::clip_image_u8> & images);
+clippp::clip_image_f32_batch clip_image_f32_batch_make(std::vector<clippp::clip_image_f32> & images);
 
 #endif // COMMON_CLIP_H

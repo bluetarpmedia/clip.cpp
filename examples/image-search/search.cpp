@@ -4,6 +4,8 @@
 
 #include <fstream>
 
+using namespace clippp;
+
 struct my_app_params {
     int32_t n_threads{4};
     std::string model;
