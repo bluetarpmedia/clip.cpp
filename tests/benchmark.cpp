@@ -52,7 +52,7 @@ int main(int argc, char ** argv) {
     const size_t batch_size = 4;
     const size_t n_threads = 4;
 
-    const int vec_dim = clip_get_text_hparams(ctx)->projection_dim;
+    const int vec_dim = clip_get_text_hparams(ctx)->common.projection_dim;
 
     std::vector<float> txt_vecs(n_labels * vec_dim);
 

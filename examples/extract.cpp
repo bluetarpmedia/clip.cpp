@@ -45,7 +45,7 @@ int main(int argc, char ** argv) {
             continue;
         }
 
-        const int vec_dim = clip_get_vision_hparams(ctx)->projection_dim;
+        const int vec_dim = clip_get_vision_hparams(ctx)->common.projection_dim;
         int shape[2] = {1, vec_dim};
         std::vector<float> vec(vec_dim);
         clip_image_encode(ctx, params.n_threads, &img_res, vec.data(), false);
@@ -69,7 +69,7 @@ int main(int argc, char ** argv) {
             continue;
         }
 
-        const int vec_dim = clip_get_text_hparams(ctx)->projection_dim;
+        const int vec_dim = clip_get_text_hparams(ctx)->common.projection_dim;
         int shape[2] = {1, vec_dim};
         std::vector<float> vec(vec_dim);
 

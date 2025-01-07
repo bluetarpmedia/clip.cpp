@@ -9,26 +9,25 @@ namespace clippp {
 
 struct clip_ctx;
 
+struct clip_common_hparams {
+    int32_t hidden_size = 0;
+    int32_t n_intermediate = 0;
+    int32_t projection_dim = 0;
+    int32_t n_head = 0;
+    int32_t n_layer = 0;
+    float eps = 0.0f;
+};
+
 struct clip_text_hparams {
-    int32_t n_vocab;
-    int32_t num_positions;
-    int32_t hidden_size;
-    int32_t n_intermediate;
-    int32_t projection_dim;
-    int32_t n_head;
-    int32_t n_layer;
-    float eps;
+    int32_t n_vocab = 0;
+    int32_t num_positions = 0;
+    clip_common_hparams common{};
 };
 
 struct clip_vision_hparams {
-    int32_t image_size;
-    int32_t patch_size;
-    int32_t hidden_size;
-    int32_t n_intermediate;
-    int32_t projection_dim;
-    int32_t n_head;
-    int32_t n_layer;
-    float eps;
+    int32_t image_size = 0;
+    int32_t patch_size = 0;
+    clip_common_hparams common{};
 };
 
 using clip_vocab_id = int32_t;

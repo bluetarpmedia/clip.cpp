@@ -130,7 +130,7 @@ int main(int argc, char ** argv) {
         printf("%s: index files size missmatch\n", __func__);
     }
 
-    const int vec_dim = clip_get_vision_hparams(clip_ctx)->projection_dim;
+    const int vec_dim = clip_get_vision_hparams(clip_ctx)->common.projection_dim;
     std::vector<float> vec(vec_dim);
 
     if (!params.img_path.empty()) {

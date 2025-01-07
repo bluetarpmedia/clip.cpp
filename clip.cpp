@@ -478,13 +478,13 @@ clip_ctx * clip_model_load(const char * fname, const int verbosity = 1) {
         // load text model
         auto & text_model = new_clip->text_model;
         auto & hparams = text_model.hparams;
-        hparams.hidden_size = get_u32(ctx, format(KEY_N_EMBD, "text"));
-        hparams.n_head = get_u32(ctx, format(KEY_N_HEAD, "text"));
-        hparams.n_intermediate = get_u32(ctx, format(KEY_N_FF, "text"));
-        hparams.n_layer = get_u32(ctx, format(KEY_N_BLOCK, "text"));
+        hparams.common.hidden_size = get_u32(ctx, format(KEY_N_EMBD, "text"));
+        hparams.common.n_head = get_u32(ctx, format(KEY_N_HEAD, "text"));
+        hparams.common.n_intermediate = get_u32(ctx, format(KEY_N_FF, "text"));
+        hparams.common.n_layer = get_u32(ctx, format(KEY_N_BLOCK, "text"));
         hparams.num_positions = get_u32(ctx, KEY_N_POSITIONS);
-        hparams.projection_dim = get_u32(ctx, format(KEY_PROJ_DIM, "text"));
-        hparams.eps = get_f32(ctx, format(KEY_LAYER_NORM_EPS, "text"));
+        hparams.common.projection_dim = get_u32(ctx, format(KEY_PROJ_DIM, "text"));
+        hparams.common.eps = get_f32(ctx, format(KEY_LAYER_NORM_EPS, "text"));
 
         const int idx_tokens = get_key_idx(ctx, KEY_TOKENS);
         hparams.n_vocab = gguf_get_arr_n(ctx, idx_tokens);
@@ -499,11 +499,11 @@ clip_ctx * clip_model_load(const char * fname, const int verbosity = 1) {
             printf("\n%s: text model hparams\n", __func__);
             printf("n_vocab            %d\n", hparams.n_vocab);
             printf("num_positions      %d\n", hparams.num_positions);
-            printf("t_hidden_size      %d\n", hparams.hidden_size);
-            printf("t_n_intermediate   %d\n", hparams.n_intermediate);
-            printf("t_projection_dim   %d\n", hparams.projection_dim);
-            printf("t_n_head           %d\n", hparams.n_head);
-            printf("t_n_layer          %d\n", hparams.n_layer);
+            printf("t_hidden_size      %d\n", hparams.common.hidden_size);
+            printf("t_n_intermediate   %d\n", hparams.common.n_intermediate);
+            printf("t_projection_dim   %d\n", hparams.common.projection_dim);
+            printf("t_n_head           %d\n", hparams.common.n_head);
+            printf("t_n_layer          %d\n", hparams.common.n_layer);
         }
 
         text_model.token_embeddings = get_tensor(new_clip->ctx, format(TN_TOKEN_EMBD, "t"));
@@ -511,8 +511,8 @@ clip_ctx * clip_model_load(const char * fname, const int verbosity = 1) {
         text_model.post_ln_w = get_tensor(new_clip->ctx, format(TN_LN_POST, "t", "weight"));
         text_model.post_ln_b = get_tensor(new_clip->ctx, format(TN_LN_POST, "t", "bias"));
         text_model.projection = get_tensor(new_clip->ctx, TN_TEXT_PROJ);
-        text_model.layers.resize(hparams.n_layer);
-        for (int il = 0; il < hparams.n_layer; ++il) {
+        text_model.layers.resize(hparams.common.n_layer);
+        for (int il = 0; il < hparams.common.n_layer; ++il) {
             auto & layer = text_model.layers[il];
             layer.k_w = get_tensor(new_clip->ctx, format(TN_ATTN_K, "t", il, "weight"));
             layer.q_w = get_tensor(new_clip->ctx, format(TN_ATTN_Q, "t", il, "weight"));
@@ -538,14 +538,14 @@ clip_ctx * clip_model_load(const char * fname, const int verbosity = 1) {
         // load vision model
         auto & vision_model = new_clip->vision_model;
         auto & hparams = vision_model.hparams;
-        hparams.hidden_size = get_u32(ctx, format(KEY_N_EMBD, "vision"));
-        hparams.n_head = get_u32(ctx, format(KEY_N_HEAD, "vision"));
-        hparams.n_intermediate = get_u32(ctx, format(KEY_N_FF, "vision"));
-        hparams.n_layer = get_u32(ctx, format(KEY_N_BLOCK, "vision"));
+        hparams.common.hidden_size = get_u32(ctx, format(KEY_N_EMBD, "vision"));
+        hparams.common.n_head = get_u32(ctx, format(KEY_N_HEAD, "vision"));
+        hparams.common.n_intermediate = get_u32(ctx, format(KEY_N_FF, "vision"));
+        hparams.common.n_layer = get_u32(ctx, format(KEY_N_BLOCK, "vision"));
         hparams.image_size = get_u32(ctx, KEY_IMAGE_SIZE);
         hparams.patch_size = get_u32(ctx, KEY_PATCH_SIZE);
-        hparams.projection_dim = get_u32(ctx, format(KEY_PROJ_DIM, "vision"));
-        hparams.eps = get_f32(ctx, format(KEY_LAYER_NORM_EPS, "vision"));
+        hparams.common.projection_dim = get_u32(ctx, format(KEY_PROJ_DIM, "vision"));
+        hparams.common.eps = get_f32(ctx, format(KEY_LAYER_NORM_EPS, "vision"));
 
         int idx_mean = get_key_idx(ctx, KEY_IMAGE_MEAN);
         int idx_std = get_key_idx(ctx, KEY_IMAGE_STD);
@@ -558,11 +558,11 @@ clip_ctx * clip_model_load(const char * fname, const int verbosity = 1) {
             printf("\n%s: vision model hparams\n", __func__);
             printf("image_size         %d\n", hparams.image_size);
             printf("patch_size         %d\n", hparams.patch_size);
-            printf("v_hidden_size      %d\n", hparams.hidden_size);
-            printf("v_n_intermediate   %d\n", hparams.n_intermediate);
-            printf("v_projection_dim   %d\n", hparams.projection_dim);
-            printf("v_n_head           %d\n", hparams.n_head);
-            printf("v_n_layer          %d\n", hparams.n_layer);
+            printf("v_hidden_size      %d\n", hparams.common.hidden_size);
+            printf("v_n_intermediate   %d\n", hparams.common.n_intermediate);
+            printf("v_projection_dim   %d\n", hparams.common.projection_dim);
+            printf("v_n_head           %d\n", hparams.common.n_head);
+            printf("v_n_layer          %d\n", hparams.common.n_layer);
         }
 
         vision_model.patch_embeddings = get_tensor(new_clip->ctx, TN_PATCH_EMBD);
@@ -573,8 +573,8 @@ clip_ctx * clip_model_load(const char * fname, const int verbosity = 1) {
         vision_model.post_ln_w = get_tensor(new_clip->ctx, format(TN_LN_POST, "v", "weight"));
         vision_model.post_ln_b = get_tensor(new_clip->ctx, format(TN_LN_POST, "v", "bias"));
         vision_model.projection = get_tensor(new_clip->ctx, TN_VIS_PROJ);
-        vision_model.layers.resize(hparams.n_layer);
-        for (int il = 0; il < hparams.n_layer; ++il) {
+        vision_model.layers.resize(hparams.common.n_layer);
+        for (int il = 0; il < hparams.common.n_layer; ++il) {
             auto & layer = vision_model.layers[il];
             layer.k_w = get_tensor(new_clip->ctx, format(TN_ATTN_K, "v", il, "weight"));
             layer.q_w = get_tensor(new_clip->ctx, format(TN_ATTN_Q, "v", il, "weight"));
@@ -908,13 +908,13 @@ bool clip_text_encode(const clip_ctx * ctx, const int n_threads, const clip_toke
 
     const int n_vocab = hparams.n_vocab;
     const int num_positions = hparams.num_positions;
-    const int hidden_size = hparams.hidden_size;
-    const int n_head = hparams.n_head;
+    const int hidden_size = hparams.common.hidden_size;
+    const int n_head = hparams.common.n_head;
     const int d_head = hidden_size / n_head;
-    const int n_layer = hparams.n_layer;
-    const int n_intermediate = hparams.n_intermediate;
-    const int projection_dim = hparams.projection_dim;
-    const float eps = hparams.eps;
+    const int n_layer = hparams.common.n_layer;
+    const int n_intermediate = hparams.common.n_intermediate;
+    const int projection_dim = hparams.common.projection_dim;
+    const float eps = hparams.common.eps;
 
     auto & buf_compute = ctx->buf_compute;
 
@@ -1141,13 +1141,13 @@ bool clip_image_batch_encode(const clip_ctx * ctx, const int n_threads, const cl
     const int patch_size = hparams.patch_size;
     const int num_patches = ((image_size / patch_size) * (image_size / patch_size));
     const int num_positions = num_patches + 1;
-    const int hidden_size = hparams.hidden_size;
-    const int n_head = hparams.n_head;
+    const int hidden_size = hparams.common.hidden_size;
+    const int n_head = hparams.common.n_head;
     const int d_head = hidden_size / n_head;
-    const int n_layer = hparams.n_layer;
-    const int n_intermediate = hparams.n_intermediate;
-    const int projection_dim = hparams.projection_dim;
-    const float eps = hparams.eps;
+    const int n_layer = hparams.common.n_layer;
+    const int n_intermediate = hparams.common.n_intermediate;
+    const int projection_dim = hparams.common.projection_dim;
+    const float eps = hparams.common.eps;
     const int batch_size = static_cast<int>(imgs->size);
 
     auto & buf_compute = ctx->buf_compute;
@@ -1421,7 +1421,7 @@ bool clip_compare_text_and_image(const clip_ctx * ctx, const int n_threads, cons
     }
 
     // prepare image and text vectors
-    const int projection_dim = ctx->vision_model.hparams.projection_dim;
+    const int projection_dim = ctx->vision_model.hparams.common.projection_dim;
     std::vector<float> img_vec(projection_dim);
     std::vector<float> txt_vec(projection_dim);
 
@@ -1497,7 +1497,7 @@ bool clip_zero_shot_label_image(clip_ctx * ctx, const int n_threads, const clip_
     // load the image
     clip_image_f32 img_res;
 
-    const int vec_dim = clip_get_vision_hparams(ctx)->projection_dim;
+    const int vec_dim = clip_get_vision_hparams(ctx)->common.projection_dim;
 
     clip_image_preprocess(ctx, input_img, &img_res);
 

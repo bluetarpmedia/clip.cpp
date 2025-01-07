@@ -81,7 +81,7 @@ int main(int argc, char ** argv) {
     std::vector<std::string> image_file_index;
     unum::usearch::index_gt<unum::usearch::cos_gt<float>> embd_index;
 
-    const size_t vec_dim = clip_get_vision_hparams(clip_ctx)->projection_dim;
+    const size_t vec_dim = clip_get_vision_hparams(clip_ctx)->common.projection_dim;
     const size_t batch_size = 4;
 
     size_t label = 0;
